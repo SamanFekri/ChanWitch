@@ -32,6 +32,18 @@ func (cw *ChanWitch) Add(name string, ch interface{}) error {
 		return nil
 }
 
+// Remove removes a channel from the list.
+func (cw *ChanWitch) Remove(name string) {
+    cw.mutex.Lock()
+    defer cw.mutex.Unlock()
+    // check the channel exists
+    if _, exists := cw.channels[name]; !exists {
+        return
+    }
+    // Remove the channel from the list
+    delete(cw.channels, name)
+}
+
 // Get returns an existing channel if it exists, otherwise nil.
 func (cw *ChanWitch) Get(name string) interface{} {
     cw.mutex.Lock()
@@ -50,7 +62,7 @@ func (cw *ChanWitch) CloseAll() {
     defer cw.mutex.Unlock()
 
     for name, ch := range cw.channels {
-        close(ch.(chan interface{}))
+        safeClose(ch.(chan interface{}))
         // Remove the channel from the list
         delete(cw.channels, name)
     }
@@ -62,7 +74,7 @@ func (cw *ChanWitch) Close(name string) error {
     defer cw.mutex.Unlock()
 
     if ch, exists := cw.channels[name]; exists {
-        close(ch.(chan interface{}))
+        safeClose(ch.(chan interface{}))
         // Remove the channel from the list
         delete(cw.channels, name)
         return nil
@@ -86,4 +98,14 @@ func (cw *ChanWitch) String() string {
 // Len returns the number of channels in the list.
 func (cw *ChanWitch) Len() int {
     return len(cw.channels)
+}
+
+// safeClose closes a channel and prevents a panic if it's already closed.
+func safeClose(ch chan interface{}) {
+    defer func() {
+        if r := recover(); r != nil {
+            // Recover from panic if the channel is already closed
+        }
+    }()
+    close(ch)
 }
