@@ -1,7 +1,6 @@
 package chanwitch
 
 import (
-	"fmt"
 	"time"
 )
 // PoofChan provides a generic channel that automatically closes if it remains inactive for a specified duration.
