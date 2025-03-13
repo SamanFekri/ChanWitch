@@ -56,7 +56,7 @@ func (cw *ChanWitch) CloseAll() {
     }
 }
 
-// Close closes the specified channel.
+// Close closes the specified channel. If the channel does not exist, return an error.
 func (cw *ChanWitch) Close(name string) {
     cw.mutex.Lock()
     defer cw.mutex.Unlock()
@@ -65,7 +65,9 @@ func (cw *ChanWitch) Close(name string) {
         close(ch.(chan interface{}))
         // Remove the channel from the list
         delete(cw.channels, name)
+        return nil
     }
+    return errors.New("Channel does not exist")
 }
 
 // String returns a string representation of the ChanWitch.
