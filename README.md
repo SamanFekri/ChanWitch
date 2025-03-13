@@ -12,7 +12,7 @@ ChanWitch 🧙‍♀️ is a lightweight Go library for managing named channels.
 ## Installation
 
 ```sh
-go get github.com/yourusername/chanwitch
+go get github.com/SamanFekri/chanwitch
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ package main
 
 import (
     "fmt"
-    "github.com/yourusername/chanwitch"
+    "github.com/SamanFekri/chanwitch"
 )
 
 func main() {
