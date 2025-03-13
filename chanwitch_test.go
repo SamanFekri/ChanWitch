@@ -2,6 +2,7 @@ package chanwitch
 
 import (
 	"testing"
+	"time"
 )
 
 func TestNewChanWitch(t *testing.T) {
@@ -85,6 +86,8 @@ func TestString(t *testing.T) {
 	cw.Add("test1", ch1)
 	cw.Add("test2", ch2)
 
+	time.Sleep(300 * time.Millisecond)
+
 	expected := " <- test1\n <- test2"
 	got := cw.String()
 	if got != expected {
@@ -97,7 +100,7 @@ func TestString(t *testing.T) {
 	if got != "" {
 		t.Error("String() should return empty string for empty ChanWitch")
 	}
-} 
+}
 
 func TestLen(t *testing.T) {
 	cw := NewChanWitch()
@@ -109,7 +112,6 @@ func TestLen(t *testing.T) {
 	if cw.Len() != 2 {
 		t.Error("Len() should return 2")
 	}
-
 
 	// Test after Close a channel
 	cw.Close("test1")
@@ -136,4 +138,35 @@ func TestLen(t *testing.T) {
 		t.Error("Len() should return 0 for empty ChanWitch")
 	}
 
+}
+
+// Test ChanWitch with PoofChan
+func TestPoofChan(t *testing.T) {
+	cw := NewChanWitch()
+	ch1 := NewPoofChan[int](2, 1*time.Second, func() { cw.Close("test1") }, nil)
+
+	cw.Add("test1", ch1)
+
+	go func() {
+		for i := range 5 {
+			ch1.Send(i)
+		}
+	}()
+
+	// listen to the channel
+	for i := range 5 {
+		v, ok := ch1.Receive()
+		if !ok {
+			t.Errorf("Recvive() failed")
+		}
+		if v != i {
+			t.Errorf("Recvive() = %v, want %v", v, i)
+		}
+	}
+
+	time.Sleep(2 * time.Second)
+	// Verify channel is removed
+	if cw.Get("test1") != nil {
+		t.Error("Channel should be removed after closing")
+	}
 }
