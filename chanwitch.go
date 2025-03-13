@@ -2,7 +2,7 @@ package chanwitch
 
 import (
     "sync"
-		"errors"
+    "errors"
 )
 
 // ChanWitch manages named channels with an inactivity timeout.
@@ -63,8 +63,8 @@ func (cw *ChanWitch) Close(name string) {
 
     if ch, exists := cw.channels[name]; exists {
         close(ch.(chan interface{}))
-				// Remove the channel from the list
-				delete(cw.channels, name)
+        // Remove the channel from the list
+        delete(cw.channels, name)
     }
 }
 
