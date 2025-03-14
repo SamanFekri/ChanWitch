@@ -3,14 +3,15 @@ package chanwitch
 import (
 	"time"
 )
+
 // PoofChan provides a generic channel that automatically closes if it remains inactive for a specified duration.
 type PoofChan[T any] struct {
-	ch         chan T          // The main channel for data communication
-	timer      *time.Timer     // Timer used to track inactivity duration
-	duration   time.Duration   // The configured timeout duration
-	closeCb    func()         // Callback function invoked when the channel closes
-	resetCb    func()         // Callback function invoked when the timer resets due to non-empty channel
-	resetChan  chan struct{}   // Internal signal channel to reset the timer
+	ch        chan T        // The main channel for data communication
+	timer     *time.Timer   // Timer used to track inactivity duration
+	duration  time.Duration // The configured timeout duration
+	closeCb   func()        // Callback function invoked when the channel closes
+	resetCb   func()        // Callback function invoked when the timer resets due to non-empty channel
+	resetChan chan struct{} // Internal signal channel to reset the timer
 }
 
 // NewPoofChan initializes a PoofChan with a given timeout duration and an optional close callback.
@@ -36,10 +37,7 @@ func NewPoofChan[T any](size int, duration time.Duration, closeCb func(), resetC
 					}
 					continue
 				}
-				pc.safeClose(pc.ch)
-				if pc.closeCb != nil {
-					pc.closeCb()
-				}
+				pc.Close()
 				return
 			case <-pc.resetChan: // Reset the timer on activity
 				if !pc.timer.Stop() {
@@ -90,7 +88,6 @@ func (pc *PoofChan[T]) Close() {
 	pc.timer.Stop()
 }
 
-
 // safeClose closes a channel and prevents a panic if it's already closed.
 func (pc *PoofChan[T]) safeClose(ch chan T) {
 	defer func() {
@@ -100,4 +97,7 @@ func (pc *PoofChan[T]) safeClose(ch chan T) {
 	}()
 	// close the ch
 	close(ch)
+	if pc.closeCb != nil {
+		pc.closeCb()
+	}
 }

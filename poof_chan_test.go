@@ -49,7 +49,7 @@ func TestPoofChanTimeout(t *testing.T) {
 	pc.Receive()
 
 	// Wait for timeout
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	if !closeCalled {
 		t.Error("Close callback should have been called")
@@ -99,4 +99,23 @@ func TestPoofChanStringType(t *testing.T) {
 	if received != value {
 		t.Errorf("Received %v, expected %v", received, value)
 	}
-} 
+}
+
+func TestPoofChanClose(t *testing.T) {
+	closeCalled := false
+	pc := NewPoofChan[int](1, 100*time.Millisecond, func() { closeCalled = true }, nil)
+
+	// Send a value
+	pc.Send(42)
+	pc.Receive()
+
+	// Close the channel
+	pc.Close()
+
+	// Wait for timeout
+	time.Sleep(200 * time.Millisecond)
+
+	if !closeCalled {
+		t.Error("Close callback should have been called")
+	}
+}

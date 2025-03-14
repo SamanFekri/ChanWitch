@@ -109,7 +109,7 @@ func (cw *ChanWitch) safeClose(ch interface{}) {
 		}
 	}()
 	t := reflect.TypeOf(ch).String()
-	// if t starts with *chanwitch.PoofChan, close the ch.ch
+	// if t starts with *chanwitch.PoofChan, close the PoofChan
 	if t[:len("*chanwitch.PoofChan")] == "*chanwitch.PoofChan" {
 		ch.(*PoofChan[any]).Close()
 		return
