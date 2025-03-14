@@ -63,7 +63,7 @@ func (cw *ChanWitch) CloseAll() {
 	defer cw.mutex.Unlock()
 
 	for name, ch := range cw.channels {
-		safeClose(ch)
+		cw.safeClose(ch)
 		// Remove the channel from the list
 		delete(cw.channels, name)
 	}
@@ -75,7 +75,7 @@ func (cw *ChanWitch) Close(name string) error {
 	defer cw.mutex.Unlock()
 
 	if ch, exists := cw.channels[name]; exists {
-		safeClose(ch)
+		cw.safeClose(ch)
 		// Remove the channel from the list
 		delete(cw.channels, name)
 		return nil
@@ -102,7 +102,7 @@ func (cw *ChanWitch) Len() int {
 }
 
 // safeClose closes a channel and prevents a panic if it's already closed.
-func safeClose(ch interface{}) {
+func (cw *ChanWitch) safeClose(ch interface{}) {
 	defer func() {
 		if r := recover(); r != nil {
 			// Recover from panic if the channel is already closed
@@ -111,7 +111,7 @@ func safeClose(ch interface{}) {
 	t := reflect.TypeOf(ch).String()
 	// if t starts with *chanwitch.PoofChan, close the ch.ch
 	if t[:len("*chanwitch.PoofChan")] == "*chanwitch.PoofChan" {
-		close(ch.(*PoofChan[any]).ch)
+		ch.(*PoofChan[any]).Close()
 		return
 	}
 	// close the ch

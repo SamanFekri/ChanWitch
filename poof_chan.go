@@ -36,7 +36,7 @@ func NewPoofChan[T any](size int, duration time.Duration, closeCb func(), resetC
 					}
 					continue
 				}
-				close(pc.ch)
+				pc.safeClose(pc.ch)
 				if pc.closeCb != nil {
 					pc.closeCb()
 				}
@@ -82,4 +82,22 @@ func (pc *PoofChan[T]) Receive() (T, bool) {
 		}
 	}
 	return val, ok
+}
+
+// Close closes the channel and stops the timer.
+func (pc *PoofChan[T]) Close() {
+	pc.safeClose(pc.ch)
+	pc.timer.Stop()
+}
+
+
+// safeClose closes a channel and prevents a panic if it's already closed.
+func (pc *PoofChan[T]) safeClose(ch chan T) {
+	defer func() {
+		if r := recover(); r != nil {
+			// Recover from panic if the channel is already closed
+		}
+	}()
+	// close the ch
+	close(ch)
 }
