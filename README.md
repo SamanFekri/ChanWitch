@@ -169,6 +169,9 @@ Sends a value to the channel. Returns false if the channel is closed.
 #### `func (pc *PoofChan[T]) Receive() (T, bool)`
 Receives a value from the channel. Returns false if the channel is closed.
 
+#### `func (pc *PoofChan[T]) Close()`
+Closes the channel and stops the timer.
+
 ## Use Cases
 
 1. **Temporary Data Processing** 🚀
